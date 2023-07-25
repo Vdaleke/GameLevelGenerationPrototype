@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "RayTracingBuiltInResources.h"
 #include "UObject/ObjectPtr.h"
 #include "Engine/World.h"
+#include "Engine/LevelStreamingDynamic.h"
 #include "GameFramework/GameModeBase.h"
 #include "WorldPartition/DataLayer/DataLayerAsset.h"
 #include "CloneDataLayerGameModeBase.generated.h"
@@ -24,6 +26,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "DataLayer")
 	TObjectPtr<const UDataLayerAsset> DataLayerAsset2;
+
+	UPROPERTY(EditAnywhere)
+	ULevelStreamingDynamic* LevelStreaming;
 	
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable, Meta = (WorldContext = WorldContextObject))
+	void GetAllActorsOfClassFromStreamLevel();
 };
