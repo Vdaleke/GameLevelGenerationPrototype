@@ -23,14 +23,23 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "DataLayer")
 	TObjectPtr<const UDataLayerAsset> DataLayerAsset1;
-
+	
 	UPROPERTY(EditAnywhere, Category = "DataLayer")
 	TObjectPtr<const UDataLayerAsset> DataLayerAsset2;
+	
+	UPROPERTY(EditAnywhere, Category = "DataLayer")
+	AActor* TestActor;
+
+	UPROPERTY(EditAnywhere, Category = "DataLayer")
+	TSubclassOf<AActor> SpawnedActorClass;
 
 	UPROPERTY(EditAnywhere)
 	ULevelStreamingDynamic* LevelStreaming;
 	
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveDataLayerFromActor(AActor* Actor);
 
 	UFUNCTION(BlueprintCallable, Meta = (WorldContext = WorldContextObject))
 	void GetAllActorsOfClassFromStreamLevel();

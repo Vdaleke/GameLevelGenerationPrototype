@@ -8,6 +8,7 @@
 #include "Engine/LevelStreamingDynamic.h"
 #include "DataLayer/DataLayerEditorSubsystem.h"
 #include "Engine/World.h"
+#include "GameFramework/Character.h"
 #include "WorldPartition/DataLayer/DataLayerInstance.h"
 #include "Subsystems/SubsystemCollection.h"
 #include "WorldPartition/DataLayer/DataLayerSubsystem.h"
@@ -17,47 +18,70 @@ void ACloneDataLayerGameModeBase::BeginPlay()
 	Super::BeginPlay();
 	
 	UDataLayerSubsystem* DataLayerSubsystem = UWorld::GetSubsystem<UDataLayerSubsystem>(GetWorld());
-
-	UDataLayerEditorSubsystem* DataLayerEditorSubsystem = GEditor->GetEditorSubsystem<UDataLayerEditorSubsystem>();
 	
-	if (HasAuthority() && DataLayerAsset1 && DataLayerAsset2 && DataLayerSubsystem && DataLayerEditorSubsystem)
+	if (HasAuthority() && DataLayerAsset1 && DataLayerAsset2 && DataLayerSubsystem)
 	{
 		if ( DataLayerSubsystem->GetDataLayerInstanceRuntimeState(DataLayerAsset1) == EDataLayerRuntimeState::Activated)
 		{
 			if(GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Activated"));	
 		}
-
-		// DataLayerSubsystem->SetDataLayerInstanceRuntimeState(DataLayerAsset1, EDataLayerRuntimeState::Unloaded);
-
-		if ( DataLayerSubsystem->GetDataLayerInstanceRuntimeState(DataLayerAsset1) == EDataLayerRuntimeState::Unloaded)
-		{
-			if(GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Unloaded"));	
-		}
-
+		
 		bool bSuccess = false;
 
 		LevelStreaming = ULevelStreamingDynamic::LoadLevelInstance(GWorld, "Arena", FVector::ZeroVector, FRotator::ZeroRotator, bSuccess);
 
-		LevelStreaming->OnLevelLoaded.AddDynamic(this, &ACloneDataLayerGameModeBase::GetAllActorsOfClassFromStreamLevel);
+		UDataLayerInstance* DataLayerInstance1 = DataLayerSubsystem->GetDataLayerInstanceFromAsset(DataLayerAsset1);
+
+		/*
+		if (TestActor->RemoveDataLayer(DataLayerAsset1) && GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Removed data layer 1 from Test Actor") );
+		}
+		*/
+
+		const FVector SpawnLocation = FVector(200.0f,0.0f,0.0f);
+
+		TestActor = GetWorld()->SpawnActor(SpawnedActorClass, &SpawnLocation, &FRotator::ZeroRotator);
+
+		if (TestActor) {
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Spawned Actor") );
+		} else {
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Cant spawn Actor") );
+		}
+
+		const UDataLayerInstance* DataLayerInstance2 = DataLayerSubsystem->GetDataLayerInstanceFromAsset(DataLayerAsset2);
+		
+		if (TestActor && TestActor->AddDataLayer(DataLayerInstance2) && GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Added data layer 2 to Test Actor") );
+		}
+		
+		// LevelStreaming->OnLevelLoaded.AddDynamic(this, &ACloneDataLayerGameModeBase::GetAllActorsOfClassFromStreamLevel);
 
 		// DataLayerSubsystem->SetDataLayerInstanceRuntimeState(DataLayerAsset1, EDataLayerRuntimeState::Unloaded);
 		
-		// UDataLayerInstance* DataLayerInstance1 = DataLayerSubsystem->GetDataLayerInstanceFromAsset(DataLayerAsset1);
+		// if(GEngine && DataLayerInstance1)
+		//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("DataLayerInstance1 laoded") );
 
 		// DataLayerSubsystem->RemoveDataLayer(DataLayerInstance1);
 		
-		// TArray<AActor*> LevelInstanceActors = DataLayerEditorSubsystem->GetActorsFromDataLayer(DataLayerInstance1);
+	
+		
+		// if(GEngine && DataLayerInstance2)
+		//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("DataLayerInstance2 laoded") );
 
-		// UDataLayerInstance* DataLayerInstance2 = DataLayerSubsystem->GetDataLayerInstanceFromAsset(DataLayerAsset2);
-
-		// DataLayerEditorSubsystem->AddActorsToDataLayer(LevelInstanceActors, DataLayerInstance2);
+		// DataLayerEditorSubsystem->AddActorsToDataLayer(Actors, DataLayerInstance2);
 
 		// ULevelStreamingDynamic* StreamingLevel2 = ULevelStreamingDynamic::LoadLevelInstance(GWorld, "Arena", FVector(200.0,0.0,0.0), FRotator::ZeroRotator, bSuccess);
 		
 		// DataLayerSubsystem->SetDataLayerInstanceRuntimeState(DataLayerAsset2, EDataL
 	}
+}
+
+void ACloneDataLayerGameModeBase::RemoveDataLayerFromActor(AActor* Actor)
+{
+	Actor->RemoveAllDataLayers();
 }
 
 void ACloneDataLayerGameModeBase::GetAllActorsOfClassFromStreamLevel()
@@ -70,50 +94,11 @@ void ACloneDataLayerGameModeBase::GetAllActorsOfClassFromStreamLevel()
 	
 	UDataLayerSubsystem* DataLayerSubsystem = UWorld::GetSubsystem<UDataLayerSubsystem>(GetWorld());
 	
-	UDataLayerEditorSubsystem* DataLayerEditorSubsystem = GEditor->GetEditorSubsystem<UDataLayerEditorSubsystem>();
-	
 	if (!LevelStreaming)
 	{
 		if(GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("no streaming level"));
 		return;
 	}
-
-	if (LevelStreaming->GetLoadedLevel() && LevelStreaming->GetLoadedLevel()->Actors[1] && DataLayerSubsystem->GetDataLayerInstanceFromAsset(DataLayerAsset1) && DataLayerEditorSubsystem)
-	{
-	 	for (AActor* LevelActor : LevelStreaming->GetLoadedLevel()->Actors)
-	 	{
-	 		if(GEngine)
-	 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,  LevelActor->GetName());
-	 	}
-		
-		bool result = DataLayerEditorSubsystem->AddActorToDataLayer(LevelStreaming->GetLoadedLevel()->Actors[1], DataLayerSubsystem->GetDataLayerInstanceFromAsset(DataLayerAsset1));
-		if (result)
-		{
-			if(GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Added to data layer"));
-		}
-		else
-		 {
-		 	if(GEngine)
-		 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Didn't add to data layer"));
-		 }
-	} else
-	{
-		if(GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Something bad"));
-		
-		if(GEngine && !LevelStreaming->GetLoadedLevel())
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("can't get loaded level"));
-			
-		if(GEngine && LevelStreaming->GetLoadedLevel() && LevelStreaming->GetLoadedLevel()->Actors.Num() == 0 )
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("no actors"));
-
-		if(GEngine && !DataLayerSubsystem->GetDataLayerInstanceFromAsset(DataLayerAsset1))
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("no data layer instance"));
-
-		if(GEngine && !DataLayerEditorSubsystem)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("no data layer editor system"));
-	}
+	
 }
-
