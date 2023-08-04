@@ -7,7 +7,7 @@
 #include "LevelGenerationModelGameModeBase.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class LEVELGENERATIONMODEL_API ALevelGenerationModelGameModeBase : public AGameModeBase
