@@ -6,6 +6,7 @@
 #include "RunLevelGenerationData.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "GameFramework/GameModeBase.h"
+#include "GameFramework/PlayerStart.h"
 #include "GlobalLevelGameMode.generated.h"
 
 /**
@@ -32,4 +33,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	URunLevelGenerationData* RunLevelGenerationData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSoftObjectPtr<APlayerStart> PlayerStart;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector ZeroArenaLocation;
 };

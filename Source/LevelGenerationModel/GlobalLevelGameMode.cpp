@@ -6,6 +6,7 @@
 AGlobalLevelGameMode::AGlobalLevelGameMode()
 {
 	CurrentLevel = 0;
+	ZeroArenaLocation = {0.0f, 0.0f, 0.0f};
 }
 
 int32 AGlobalLevelGameMode::GetCurrentLevel() const
@@ -20,7 +21,7 @@ void AGlobalLevelGameMode::BeginPlay()
 	const TArray<FArenaData> ArenaData = RunLevelGenerationData->GetArenaData();
 	LoadedArenas.Reserve(ArenaData.Num());
 
-	FVector NextArenaLocation = {0.0f, 0.0f, 0.0f};
+	FVector NextArenaLocation = ZeroArenaLocation;
 
 	for (int ArenaNumber = 0; ArenaNumber < ArenaData.Num(); ++ArenaNumber)
 	{
