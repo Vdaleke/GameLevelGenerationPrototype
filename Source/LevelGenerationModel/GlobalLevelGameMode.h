@@ -24,6 +24,9 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable, Meta = (WorldContext = WorldContextObject))
+	void PutActorsToDataAsset();
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	int32 CurrentLevel;

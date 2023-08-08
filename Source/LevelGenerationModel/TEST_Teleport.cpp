@@ -17,11 +17,3 @@ void ATEST_Teleport::BeginPlay()
 	Super::BeginPlay();
 	
 }
-
-// Called every frame
-void ATEST_Teleport::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
