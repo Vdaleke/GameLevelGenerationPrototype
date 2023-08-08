@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerSpawn.h"
 #include "Engine/DataAsset.h"
 #include "RunLevelGenerationData.generated.h"
 
@@ -13,6 +14,9 @@ struct FArenaData
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FString Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSoftObjectPtr<APlayerSpawn> PlayerSpawn;
 };
 
 /**

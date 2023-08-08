@@ -18,10 +18,3 @@ void ATEST_WinNotice::BeginPlay()
 	
 }
 
-// Called every frame
-void ATEST_WinNotice::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-

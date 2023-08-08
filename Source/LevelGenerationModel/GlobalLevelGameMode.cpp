@@ -29,6 +29,8 @@ void AGlobalLevelGameMode::BeginPlay()
 		LoadedArenas.Add(ULevelStreamingDynamic::LoadLevelInstance(
 			GWorld, ArenaData[ArenaNumber].Name, NextArenaLocation, FRotator::ZeroRotator, bSuccess));
 
+		LoadedArenas.Last()->OnLevelLoaded.AddDynamic(this, &AGlobalLevelGameMode::PutActorsToDataAsset);
+
 		if (bSuccess == false)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Arena number #%d with the name %s was not loaded"), ArenaNumber,
@@ -38,4 +40,9 @@ void AGlobalLevelGameMode::BeginPlay()
 		NextArenaLocation = FVector{NextArenaLocation.X, 0, NextArenaLocation.Z} + FMath::RandPointInBox(
 			RunLevelGenerationData->GetArenaOffset());
 	}
+}
+
+void AGlobalLevelGameMode::PutActorsToDataAsset()
+{
+	
 }
