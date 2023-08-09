@@ -42,4 +42,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector ZeroArenaLocation;
+
+private:
+	int32 LastLoadedArena;
 };
