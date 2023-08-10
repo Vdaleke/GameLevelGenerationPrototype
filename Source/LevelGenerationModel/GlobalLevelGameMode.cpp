@@ -7,6 +7,7 @@ AGlobalLevelGameMode::AGlobalLevelGameMode()
 {
 	CurrentLevel = 0;
 	ZeroArenaLocation = {0.0f, 0.0f, 0.0f};
+	LastLoadedArena = 0;
 }
 
 int32 AGlobalLevelGameMode::GetCurrentLevel() const
@@ -44,5 +45,18 @@ void AGlobalLevelGameMode::BeginPlay()
 
 void AGlobalLevelGameMode::PutActorsToDataAsset()
 {
+	ULevelStreamingDynamic* LastArena = LoadedArenas[LastLoadedArena];
+
+	if (LastArena->GetLoadedLevel())
+	{
+		for (auto i : LastArena->GetLoadedLevel()->Actors)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *i->GetName());
+		}
+	} else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Level not loaded"));
+	}
 	
+	LastLoadedArena++;
 }
