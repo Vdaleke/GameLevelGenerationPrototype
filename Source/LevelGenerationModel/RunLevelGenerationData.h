@@ -14,9 +14,6 @@ struct FArenaData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Name;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<APlayerSpawn> PlayerSpawn;
 };
 
 /**

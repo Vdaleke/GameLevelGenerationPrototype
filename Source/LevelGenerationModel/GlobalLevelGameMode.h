@@ -24,25 +24,34 @@ public:
 
 	virtual void BeginPlay() override;
 
-	UFUNCTION(BlueprintCallable, Meta = (WorldContext = WorldContextObject))
-	void PutActorsToDataAsset();
+	UFUNCTION(BlueprintCallable)
+	void GoToArena(int32 ArenaNumber, AActor* Player);
+
+	UFUNCTION(BlueprintCallable)
+	void ActivateTeleportOnCurrentArena();
+
+	UFUNCTION()
+	void ActivateZeroArena();
 
 protected:
+	UFUNCTION(BlueprintCallable)
+	AActor* FindNearestActorOfClass(TSubclassOf<AActor> ActorClass, FVector Origin, float &Distance);
+	
 	UPROPERTY(VisibleAnywhere)
-	int32 CurrentLevel;
+	int32 CurrentArena;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<ULevelStreamingDynamic*> LoadedArenas;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<FVector> LoadedArenaPositions;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	URunLevelGenerationData* RunLevelGenerationData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TSoftObjectPtr<APlayerStart> PlayerStart;
+	TSoftObjectPtr<APlayerStart> PlayerStart;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector ZeroArenaLocation;
-
-private:
-	int32 LastLoadedArena;
 };
