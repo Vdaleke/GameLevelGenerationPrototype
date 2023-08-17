@@ -6,15 +6,19 @@
 // Sets default values
 ATEST_WinNotice::ATEST_WinNotice()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	SetHidden(true);
 
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("Mesh Component");
+	MeshComponent->SetupAttachment(RootComponent);
+}
+
+UStaticMeshComponent* ATEST_WinNotice::GetMeshComponent() const
+{
+	return MeshComponent;
 }
 
 // Called when the game starts or when spawned
 void ATEST_WinNotice::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
-

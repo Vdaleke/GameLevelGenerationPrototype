@@ -6,6 +6,7 @@
 #include "FunctionalUIScreenshotTest.h"
 #include "TEST_MorhingTalent.h"
 #include "TEST_Teleport.h"
+#include "TEST_WinNotice.h"
 #include "Kismet/GameplayStatics.h"
 
 AGlobalLevelGameMode::AGlobalLevelGameMode()
@@ -23,44 +24,36 @@ void AGlobalLevelGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	const TArray<FArenaData> ArenaData = RunLevelGenerationData->GetArenaData();
-	LoadedArenas.SetNum(ArenaData.Num());
-	LoadedArenaPositions.SetNum(ArenaData.Num());
+	const TArray<FString>& ArenaNames = RunLevelGenerationData->GetArenaNames();
+	LoadedArenas.SetNum(ArenaNames.Num());
+	LoadedArenaPositions.SetNum(ArenaNames.Num());
 
 	FVector NextArenaLocation = ZeroArenaLocation;
 
-	for (int ArenaNumber = 0; ArenaNumber < ArenaData.Num(); ++ArenaNumber)
+	for (int ArenaNumber = 0; ArenaNumber < ArenaNames.Num(); ++ArenaNumber)
 	{
 		bool bSuccess;
 		LoadedArenas[ArenaNumber] = ULevelStreamingDynamic::LoadLevelInstance(
-			GWorld, ArenaData[ArenaNumber].Name, NextArenaLocation, FRotator::ZeroRotator, bSuccess);
+			GWorld, ArenaNames[ArenaNumber], NextArenaLocation, FRotator::ZeroRotator, bSuccess);
 
 		LoadedArenaPositions[ArenaNumber] = NextArenaLocation;
 
 		if (bSuccess == false)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Arena number #%d with the name %s was not loaded"), ArenaNumber,
-			       *ArenaData[ArenaNumber].Name);
+			       *ArenaNames[ArenaNumber]);
 		}
 
 		NextArenaLocation = FVector{NextArenaLocation.X, 0, NextArenaLocation.Z} + FMath::RandPointInBox(
 			RunLevelGenerationData->GetArenaOffset());
 	}
 
-	LoadedArenas[0]->OnLevelLoaded.AddDynamic(this, &AGlobalLevelGameMode::ActivateZeroArena);
-	
-	for (FVector Position : LoadedArenaPositions)
-	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-			                                 FString::Printf(
-				                                 TEXT("x %f, y %f, z %f"), Position.X, Position.Y, Position.Z));
-	}
+	LoadedArenas[0]->OnLevelShown.AddDynamic(this, &AGlobalLevelGameMode::ActivateZeroArena);
 }
 
 void AGlobalLevelGameMode::GoToArena(int32 ArenaNumber, AActor* Player)
 {
-	if (ArenaNumber < 0 || LoadedArenas.Num() <= ArenaNumber)
+	if (ArenaNumber < 0 || LoadedArenas.Num() <= ArenaNumber || LoadedArenas[ArenaNumber] == nullptr)
 	{
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
@@ -70,23 +63,41 @@ void AGlobalLevelGameMode::GoToArena(int32 ArenaNumber, AActor* Player)
 
 	float DistanceToNearestSpawn;
 
-	APlayerSpawn const* PlayerSpawn = Cast<APlayerSpawn>(
+	if (APlayerSpawn const* PlayerSpawn = Cast<APlayerSpawn>(
 		FindNearestActorOfClass(APlayerSpawn::StaticClass(), LoadedArenaPositions[ArenaNumber],
-		                        DistanceToNearestSpawn));
-
-	float DistanceToNearestMorphingTalent;
-	ATEST_MorhingTalent* MorphingTalent = Cast<ATEST_MorhingTalent>(
-		FindNearestActorOfClass(ATEST_MorhingTalent::StaticClass(), LoadedArenaPositions[ArenaNumber],
-		                        DistanceToNearestMorphingTalent));
-
-	if (PlayerSpawn && MorphingTalent)
+								DistanceToNearestSpawn)))
 	{
 		Player->TeleportTo(PlayerSpawn->GetActorLocation(), FRotator::ZeroRotator);
-		MorphingTalent->SetActorHiddenInGame(false);
-		MorphingTalent->GetMeshComponent()->SetGenerateOverlapEvents(true);
+		CurrentArena = ArenaNumber;
 	}
+}
 
-	CurrentArena = ArenaNumber;
+void AGlobalLevelGameMode::OnFightEnd()
+{
+	if (GetCurrentLevel() + 1 != GetNumberOfLevels())
+	{
+		float DistanceToNearestMorphingTalent;
+		ATEST_MorhingTalent* MorphingTalent = Cast<ATEST_MorhingTalent>(
+			FindNearestActorOfClass(ATEST_MorhingTalent::StaticClass(), LoadedArenaPositions[GetCurrentLevel()],
+			                        DistanceToNearestMorphingTalent));
+
+		if (MorphingTalent)
+		{
+			MorphingTalent->SetActorHiddenInGame(false);
+			MorphingTalent->GetMeshComponent()->SetGenerateOverlapEvents(true);
+		}
+	}
+	else
+	{
+		float DistanceToNearestWinNotice;
+		ATEST_WinNotice* WinNotice = Cast<ATEST_WinNotice>(FindNearestActorOfClass(
+			ATEST_WinNotice::StaticClass(), LoadedArenaPositions[GetCurrentLevel()], DistanceToNearestWinNotice));
+
+		if (WinNotice)
+		{
+			WinNotice->SetActorHiddenInGame(false);
+		}
+	}
 }
 
 void AGlobalLevelGameMode::ActivateTeleportOnCurrentArena()
@@ -106,8 +117,13 @@ void AGlobalLevelGameMode::ActivateZeroArena()
 {
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-										 FString::Printf(TEXT("Zero arena activated")));
-	
+		                                 FString::Printf(TEXT("Zero arena activated")));
+
+	FTimerHandle SpawnActorTimerHandle;
+
+	GetWorldTimerManager().SetTimer(SpawnActorTimerHandle, this, &AGlobalLevelGameMode::OnFightEnd, 1.0f, false);
+
+	/*
 	float DistanceToNearestMorphingTalent;
 	ATEST_MorhingTalent* MorphingTalent = Cast<ATEST_MorhingTalent>(
 		FindNearestActorOfClass(ATEST_MorhingTalent::StaticClass(), LoadedArenaPositions[0],
@@ -117,7 +133,12 @@ void AGlobalLevelGameMode::ActivateZeroArena()
 	{
 		MorphingTalent->SetActorHiddenInGame(false);
 		MorphingTalent->GetMeshComponent()->SetGenerateOverlapEvents(true);
-	}
+	 */
+}
+
+int32 AGlobalLevelGameMode::GetNumberOfLevels() const
+{
+	return LoadedArenas.Num();
 }
 
 AActor* AGlobalLevelGameMode::FindNearestActorOfClass(TSubclassOf<AActor> ActorClass, FVector Origin,

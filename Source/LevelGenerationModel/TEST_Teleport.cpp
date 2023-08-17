@@ -35,7 +35,11 @@ void ATEST_Teleport::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor*
 
 	if (GameMode)
 	{
-		GameMode->GoToArena(GameMode->GetCurrentLevel() + 1, OtherActor);
+		if (GameMode->GetCurrentLevel() != GameMode->GetNumberOfLevels())
+		{
+			GameMode->GoToArena(GameMode->GetCurrentLevel() + 1, OtherActor);
+		}
+
 		SetActorHiddenInGame(true);
 		MeshComponent->SetGenerateOverlapEvents(false);
 	}
