@@ -28,10 +28,16 @@ public:
 	void GoToArena(int32 ArenaNumber, AActor* Player);
 
 	UFUNCTION(BlueprintCallable)
+	void OnFightEnd();
+	
+	UFUNCTION(BlueprintCallable)
 	void ActivateTeleportOnCurrentArena();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void ActivateZeroArena();
+
+	UFUNCTION()
+	int32 GetNumberOfLevels() const;
 
 protected:
 	UFUNCTION(BlueprintCallable)

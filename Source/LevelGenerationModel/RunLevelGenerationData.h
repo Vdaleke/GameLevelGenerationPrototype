@@ -7,15 +7,6 @@
 #include "Engine/DataAsset.h"
 #include "RunLevelGenerationData.generated.h"
 
-USTRUCT(BlueprintType)
-struct FArenaData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Name;
-};
-
 /**
 	Contains all the data and parameters for generating the GlobalLevel
  */
@@ -27,11 +18,11 @@ class LEVELGENERATIONMODEL_API URunLevelGenerationData : public UDataAsset
 public:
 	explicit URunLevelGenerationData();
 
-	[[nodiscard]] TArray<FArenaData> GetArenaData() const;
+	[[nodiscard]] TArray<FString>& GetArenaNames();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FArenaData> ArenaData;
+	TArray<FString> ArenaNames;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FBox ArenaOffset;

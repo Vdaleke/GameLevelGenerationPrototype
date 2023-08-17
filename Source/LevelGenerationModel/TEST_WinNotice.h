@@ -15,8 +15,12 @@ public:
 	// Sets default values for this actor's properties
 	ATEST_WinNotice();
 
+	[[nodiscard]] UStaticMeshComponent* GetMeshComponent() const;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* MeshComponent;
 };
