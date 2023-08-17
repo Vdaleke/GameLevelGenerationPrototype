@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerSpawn.h"
 #include "Engine/DataAsset.h"
 #include "RunLevelGenerationData.generated.h"
 
