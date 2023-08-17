@@ -3,21 +3,16 @@
 
 #include "GlobalLevelGameMode.h"
 
-#include "FunctionalUIScreenshotTest.h"
-#include "TEST_MorhingTalent.h"
-#include "TEST_Teleport.h"
-#include "TEST_WinNotice.h"
+#include "ArenaActors/PlayerSpawn.h"
+#include "ArenaActors/TEST_MorphingTalent.h"
+#include "ArenaActors/TEST_Teleport.h"
+#include "ArenaActors/TEST_WinNotice.h"
 #include "Kismet/GameplayStatics.h"
 
 AGlobalLevelGameMode::AGlobalLevelGameMode()
 {
 	CurrentArena = 0;
 	ZeroArenaLocation = {0.0f, 0.0f, 0.0f};
-}
-
-int32 AGlobalLevelGameMode::GetCurrentLevel() const
-{
-	return CurrentArena;
 }
 
 void AGlobalLevelGameMode::BeginPlay()
@@ -51,13 +46,23 @@ void AGlobalLevelGameMode::BeginPlay()
 	LoadedArenas[0]->OnLevelShown.AddDynamic(this, &AGlobalLevelGameMode::ActivateZeroArena);
 }
 
+void AGlobalLevelGameMode::ActivateZeroArena()
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		                                 FString::Printf(TEXT("Zero arena activated")));
+
+	FTimerHandle SpawnActorTimerHandle;
+
+	GetWorldTimerManager().SetTimer(SpawnActorTimerHandle, this, &AGlobalLevelGameMode::SpawnArenaActorsAfterFight,
+	                                1.0f, false);
+}
+
 void AGlobalLevelGameMode::GoToArena(int32 ArenaNumber, AActor* Player)
 {
 	if (ArenaNumber < 0 || LoadedArenas.Num() <= ArenaNumber || LoadedArenas[ArenaNumber] == nullptr)
 	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-			                                 FString::Printf(TEXT("Arena with number %d doesn't exist"), ArenaNumber));
+		UE_LOG(LogTemp, Warning, TEXT("Arena with number %d doesn't exist"), ArenaNumber);
 		return;
 	}
 
@@ -65,20 +70,20 @@ void AGlobalLevelGameMode::GoToArena(int32 ArenaNumber, AActor* Player)
 
 	if (APlayerSpawn const* PlayerSpawn = Cast<APlayerSpawn>(
 		FindNearestActorOfClass(APlayerSpawn::StaticClass(), LoadedArenaPositions[ArenaNumber],
-								DistanceToNearestSpawn)))
+		                        DistanceToNearestSpawn)))
 	{
 		Player->TeleportTo(PlayerSpawn->GetActorLocation(), FRotator::ZeroRotator);
 		CurrentArena = ArenaNumber;
 	}
 }
 
-void AGlobalLevelGameMode::OnFightEnd()
+void AGlobalLevelGameMode::SpawnArenaActorsAfterFight()
 {
 	if (GetCurrentLevel() + 1 != GetNumberOfLevels())
 	{
 		float DistanceToNearestMorphingTalent;
-		ATEST_MorhingTalent* MorphingTalent = Cast<ATEST_MorhingTalent>(
-			FindNearestActorOfClass(ATEST_MorhingTalent::StaticClass(), LoadedArenaPositions[GetCurrentLevel()],
+		ATEST_MorphingTalent* MorphingTalent = Cast<ATEST_MorphingTalent>(
+			FindNearestActorOfClass(ATEST_MorphingTalent::StaticClass(), LoadedArenaPositions[GetCurrentLevel()],
 			                        DistanceToNearestMorphingTalent));
 
 		if (MorphingTalent)
@@ -113,27 +118,9 @@ void AGlobalLevelGameMode::ActivateTeleportOnCurrentArena()
 	}
 }
 
-void AGlobalLevelGameMode::ActivateZeroArena()
+int32 AGlobalLevelGameMode::GetCurrentLevel() const
 {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		                                 FString::Printf(TEXT("Zero arena activated")));
-
-	FTimerHandle SpawnActorTimerHandle;
-
-	GetWorldTimerManager().SetTimer(SpawnActorTimerHandle, this, &AGlobalLevelGameMode::OnFightEnd, 1.0f, false);
-
-	/*
-	float DistanceToNearestMorphingTalent;
-	ATEST_MorhingTalent* MorphingTalent = Cast<ATEST_MorhingTalent>(
-		FindNearestActorOfClass(ATEST_MorhingTalent::StaticClass(), LoadedArenaPositions[0],
-								DistanceToNearestMorphingTalent));
-
-	if (MorphingTalent)
-	{
-		MorphingTalent->SetActorHiddenInGame(false);
-		MorphingTalent->GetMeshComponent()->SetGenerateOverlapEvents(true);
-	 */
+	return CurrentArena;
 }
 
 int32 AGlobalLevelGameMode::GetNumberOfLevels() const

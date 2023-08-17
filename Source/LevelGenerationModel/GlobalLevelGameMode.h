@@ -6,7 +6,6 @@
 #include "RunLevelGenerationData.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "GameFramework/GameModeBase.h"
-#include "GameFramework/PlayerStart.h"
 #include "GlobalLevelGameMode.generated.h"
 
 /**
@@ -20,44 +19,41 @@ class LEVELGENERATIONMODEL_API AGlobalLevelGameMode : public AGameModeBase
 public:
 	explicit AGlobalLevelGameMode();
 
-	[[nodiscard]] int32 GetCurrentLevel() const;
-
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	void ActivateZeroArena();
 
 	UFUNCTION(BlueprintCallable)
 	void GoToArena(int32 ArenaNumber, AActor* Player);
 
 	UFUNCTION(BlueprintCallable)
-	void OnFightEnd();
-	
+	void SpawnArenaActorsAfterFight();
+
 	UFUNCTION(BlueprintCallable)
 	void ActivateTeleportOnCurrentArena();
 
-	UFUNCTION(BlueprintCallable)
-	void ActivateZeroArena();
+	[[nodiscard]] int32 GetCurrentLevel() const;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	int32 GetNumberOfLevels() const;
 
 protected:
 	UFUNCTION(BlueprintCallable)
-	AActor* FindNearestActorOfClass(TSubclassOf<AActor> ActorClass, FVector Origin, float &Distance);
-	
+	AActor* FindNearestActorOfClass(TSubclassOf<AActor> ActorClass, FVector Origin, float& Distance);
+
 	UPROPERTY(VisibleAnywhere)
 	int32 CurrentArena;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector ZeroArenaLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	URunLevelGenerationData* RunLevelGenerationData;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<ULevelStreamingDynamic*> LoadedArenas;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<FVector> LoadedArenaPositions;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	URunLevelGenerationData* RunLevelGenerationData;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<APlayerStart> PlayerStart;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector ZeroArenaLocation;
 };

@@ -5,7 +5,7 @@
 
 URunLevelGenerationData::URunLevelGenerationData()
 {
-    ArenaOffset = {FVector{150.0f, -100,50.0f}, FVector{200.0f, 100.0f, 100.0f}};
+	ArenaOffset = {FVector{150.0f, -100, 50.0f}, FVector{200.0f, 100.0f, 100.0f}};
 }
 
 TArray<FString>& URunLevelGenerationData::GetArenaNames()
@@ -17,5 +17,3 @@ FBox URunLevelGenerationData::GetArenaOffset() const
 {
 	return ArenaOffset;
 }
-
-
