@@ -26,8 +26,13 @@ void ATEST_MorphingTalent::UseMorphingTalent(UPrimitiveComponent* OverlappedComp
 {
 	if (AGlobalLevelGameMode* GameMode = Cast<AGlobalLevelGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		GameMode->ActivateTeleportOnCurrentArena();
-		SetActorHiddenInGame(true);
-		MeshComponent->SetGenerateOverlapEvents(false);
+		GameMode->GetLevelController()->ActivateTeleportOnCurrentArena();
+		Destroy();
 	}
+}
+
+void ATEST_MorphingTalent::ShowMorphingTalent()
+{
+	SetActorHiddenInGame(false);
+	MeshComponent->SetGenerateOverlapEvents(true);
 }

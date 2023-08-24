@@ -7,3 +7,8 @@ ATEST_WinNotice::ATEST_WinNotice()
 {
 	SetHidden(true);
 }
+
+void ATEST_WinNotice::ShowWinNotice()
+{
+	SetActorHiddenInGame(false);
+}

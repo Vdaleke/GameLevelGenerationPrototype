@@ -17,11 +17,11 @@ class LEVELGENERATIONMODEL_API URunLevelGenerationData : public UDataAsset
 public:
 	explicit URunLevelGenerationData();
 
-	[[nodiscard]] TArray<FString>& GetArenaNames();
+	[[nodiscard]] const TArray<TSoftObjectPtr<UWorld>>& GetArenas() const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FString> ArenaNames;
+	TArray<TSoftObjectPtr<UWorld>> Arenas;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FBox ArenaOffset;
