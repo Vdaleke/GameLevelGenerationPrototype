@@ -42,8 +42,8 @@ public:
 	void SetRunLevelGenerationData(URunLevelGenerationData* const NewRunLevelGenerationData);
 
 protected:
-	UFUNCTION(BlueprintCallable)
-	AActor* FindNearestActorOfClass(TSubclassOf<AActor> ActorClass, FVector Origin, float& Distance);
+	template<typename T>
+	T* FindNearestActorOfClass(TSubclassOf<AActor> ActorClass, FVector Origin, float& Distance);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 CurrentArena;
@@ -60,3 +60,4 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<FVector> LoadedArenaPositions;
 };
+

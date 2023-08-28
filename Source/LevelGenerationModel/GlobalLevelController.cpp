@@ -75,8 +75,8 @@ void UGlobalLevelController::GoToNextArena(AActor* Player)
 	float DistanceToNearestSpawn;
 
 	if (ATeleportPoint const* PlayerSpawn = Cast<ATeleportPoint>(
-		FindNearestActorOfClass(ATeleportPoint::StaticClass(), LoadedArenaPositions[NextArena],
-		                        DistanceToNearestSpawn)))
+		FindNearestActorOfClass<ATeleportPoint>(ATeleportPoint::StaticClass(), LoadedArenaPositions[NextArena],
+		                                        DistanceToNearestSpawn)))
 	{
 		Player->TeleportTo(PlayerSpawn->GetActorLocation(), FRotator::ZeroRotator);
 		CurrentArena = NextArena;
@@ -89,15 +89,16 @@ void UGlobalLevelController::SpawnArenaActorsAfterFight()
 	{
 		float DistanceToNearestMorphingTalent;
 
-		if (ATEST_MorphingTalent* MorphingTalent = Cast<ATEST_MorphingTalent>(
-			FindNearestActorOfClass(ATEST_MorphingTalent::StaticClass(), LoadedArenaPositions[GetCurrentLevel()],
-			                        DistanceToNearestMorphingTalent)))
+		if (ATEST_MorphingTalent* MorphingTalent = FindNearestActorOfClass<ATEST_MorphingTalent>(
+			ATEST_MorphingTalent::StaticClass(), LoadedArenaPositions[GetCurrentLevel()],
+			DistanceToNearestMorphingTalent))
 		{
 			MorphingTalent->ShowMorphingTalent();
 		}
-		else
+		else if (GEngine)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Morphing Talent not found"));
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+			                                 TEXT("Morphing talent not found!"));
 			return;
 		}
 	}
@@ -105,14 +106,15 @@ void UGlobalLevelController::SpawnArenaActorsAfterFight()
 	{
 		float DistanceToNearestWinNotice;
 
-		if (ATEST_WinNotice* WinNotice = Cast<ATEST_WinNotice>(FindNearestActorOfClass(
-			ATEST_WinNotice::StaticClass(), LoadedArenaPositions[GetCurrentLevel()], DistanceToNearestWinNotice)))
+		if (ATEST_WinNotice* WinNotice = FindNearestActorOfClass<ATEST_WinNotice>(
+			ATEST_WinNotice::StaticClass(), LoadedArenaPositions[GetCurrentLevel()], DistanceToNearestWinNotice))
 		{
 			WinNotice->ShowWinNotice();
 		}
-		else
+		else if (GEngine)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Win Notice not found"));
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+			                                 TEXT("Win Notice not found!"));
 			return;
 		}
 	}
@@ -122,15 +124,16 @@ void UGlobalLevelController::ActivateTeleportOnCurrentArena()
 {
 	float DistanceToNearestTeleport;
 
-	if (ATEST_Teleport* Teleport = Cast<ATEST_Teleport>(
-		FindNearestActorOfClass(ATEST_Teleport::StaticClass(), LoadedArenaPositions[CurrentArena],
-		                        DistanceToNearestTeleport)))
+	if (ATEST_Teleport* Teleport =
+		FindNearestActorOfClass<ATEST_Teleport>(ATEST_Teleport::StaticClass(), LoadedArenaPositions[CurrentArena],
+		                                        DistanceToNearestTeleport))
 	{
 		Teleport->ShowTeleport();
 	}
-	else
+	else if (GEngine)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Teleport not found"));
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		                                 TEXT("Teleport not found!"));
 		return;
 	}
 }
@@ -145,16 +148,16 @@ int32 UGlobalLevelController::GetNumberOfArenas() const
 	return LoadedArenas.Num();
 }
 
-AActor* UGlobalLevelController::FindNearestActorOfClass(TSubclassOf<AActor> ActorClass, FVector Origin,
-                                                        float& Distance)
+void UGlobalLevelController::SetRunLevelGenerationData(URunLevelGenerationData* const NewRunLevelGenerationData)
+{
+	RunLevelGenerationData = NewRunLevelGenerationData;
+}
+
+template <typename T>
+T* UGlobalLevelController::FindNearestActorOfClass(TSubclassOf<AActor> ActorClass, FVector Origin, float& Distance)
 {
 	TArray<AActor*> FoundSpawns;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ActorClass, FoundSpawns);
 
-	return UGameplayStatics::FindNearestActor(Origin, FoundSpawns, Distance);
-}
-
-void UGlobalLevelController::SetRunLevelGenerationData(URunLevelGenerationData* const NewRunLevelGenerationData)
-{
-	RunLevelGenerationData = NewRunLevelGenerationData;
+	return Cast<T>(UGameplayStatics::FindNearestActor(Origin, FoundSpawns, Distance));
 }
