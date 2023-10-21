@@ -8,9 +8,9 @@ URunLevelGenerationData::URunLevelGenerationData()
 	ArenaOffset = {FVector{150.0f, -100, 50.0f}, FVector{200.0f, 100.0f, 100.0f}};
 }
 
-TArray<FString>& URunLevelGenerationData::GetArenaNames()
+const TArray<TSoftObjectPtr<UWorld>>& URunLevelGenerationData::GetArenas() const
 {
-	return ArenaNames;
+	return Arenas;
 }
 
 FBox URunLevelGenerationData::GetArenaOffset() const

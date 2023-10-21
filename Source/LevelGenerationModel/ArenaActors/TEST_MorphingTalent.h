@@ -14,6 +14,9 @@ class LEVELGENERATIONMODEL_API ATEST_MorphingTalent : public AActor
 public:
 	ATEST_MorphingTalent();
 
+	UFUNCTION(BlueprintCallable)
+	void ShowMorphingTalent();
+
 	[[nodiscard]] UStaticMeshComponent* GetMeshComponent() const;
 
 protected:
@@ -22,6 +25,6 @@ protected:
 	                       class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	                       const FHitResult& SweepResult);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UStaticMeshComponent* MeshComponent;
 };

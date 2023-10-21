@@ -13,4 +13,7 @@ class LEVELGENERATIONMODEL_API ATEST_WinNotice : public AActor
 
 public:
 	ATEST_WinNotice();
+
+	UFUNCTION(BlueprintCallable)
+	void ShowWinNotice();
 };

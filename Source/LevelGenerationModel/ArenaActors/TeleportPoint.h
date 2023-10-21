@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "PlayerSpawn.generated.h"
+#include "TeleportPoint.generated.h"
 
 UCLASS()
-class LEVELGENERATIONMODEL_API APlayerSpawn : public AActor
+class LEVELGENERATIONMODEL_API ATeleportPoint : public AActor
 {
 	GENERATED_BODY()
 };
